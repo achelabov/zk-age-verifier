@@ -6,23 +6,23 @@ pragma circom 2.0.0;
 include "circomlib/comparators.circom";
 
 template AgeVerification() {
-    // Входные сигналы
-    signal input age;           // возраст пользователя (приватный)
-    signal input threshold;     // порог (18 лет, публичный)
+    // Input signals
+    signal input age;           // user's age (private)
+    signal input threshold;     // threshold (18 years, public)
     
-    // Выходной сигнал - результат проверки
-    signal output isOver18;     // 1 если возраст >= 18, иначе 0
+    // Output signal - verification result
+    signal output isOver18;     // 1 if age >= 18, otherwise 0
     
-    // Используем компаратор из circomlib для сравнения
+    // Use comparator from circomlib for comparison
     component comparator = IsGreaterOrEqualThan(128);
     
-    // Подаём на вход age и threshold
+    // Feed age and threshold to input
     comparator.in[0] <== age;
     comparator.in[1] <== threshold;
     
-    // Результат сравнения
+    // Comparison result
     isOver18 <== comparator.out;
 }
 
-// Основной компонент
+// Main component
 component main {public [threshold]} = AgeVerification();

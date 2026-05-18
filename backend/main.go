@@ -14,20 +14,20 @@ import (
 	"github.com/iden3/go-rapidsnark/verifier"
 )
 
-// VerificationRequest - запрос на верификацию
+// VerificationRequest - verification request
 type VerificationRequest struct {
 	Proof  types.ProofData `json:"proof"`
 	PubSig []string        `json:"pubSignals"`
 }
 
-// VerificationResponse - ответ верификации
+// VerificationResponse - verification response
 type VerificationResponse struct {
 	Verified bool   `json:"verified"`
 	Message  string `json:"message,omitempty"`
 	Error    string `json:"error,omitempty"`
 }
 
-// ZKConfig - конфигурация ZK
+// ZKConfig - ZK configuration
 type ZKConfig struct {
 	VerificationKeyPath string `json:"verification_key_path"`
 }
@@ -51,13 +51,13 @@ func verifyHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Создаем ZKProof из запроса
+	// Create ZKProof from request
 	zkProof := types.ZKProof{
 		Proof:      &req.Proof,
 		PubSignals: req.PubSig,
 	}
 
-	// Верификация доказательства
+	// Verify the proof
 	err := verifier.VerifyGroth16(zkProof, verificationKey)
 	if err != nil {
 		sendError(w, fmt.Sprintf("Verification failed: %v", err), http.StatusInternalServerError)
@@ -88,7 +88,7 @@ func sendError(w http.ResponseWriter, message string, statusCode int) {
 }
 
 func main() {
-	// Загрузка ключа верификации
+	// Load verification key
 	keyPath := os.Getenv("VERIFICATION_KEY_PATH")
 	if keyPath == "" {
 		keyPath = "./keys/verification_key.json"

@@ -1,8 +1,8 @@
 # ZK KYC - Zero-Knowledge Age Verification
 
-Учебный пример системы проверки возраста (18+) с использованием zero-knowledge доказательств.
+Educational example of an age verification system (18+) using zero-knowledge proofs.
 
-## Архитектура
+## Architecture
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────────┐
@@ -10,74 +10,74 @@
 │  (snarkJS)  │      │   (Circom)   │      │   (Golang)  │
 └─────────────┘      └──────────────┘      └─────────────┘
      │                      │                      │
-     │  1. Ввод даты        │                      │
-     │     рождения         │                      │
+     │  1. Enter birth      │                      │
+     │     date             │                      │
      │                      │                      │
-     │  2. Генерация        │                      │
-     │     доказательства   │                      │
+     │  2. Generate         │                      │
+     │     proof            │                      │
      │─────────────────────▶│                      │
      │                      │                      │
-     │                      │  3. Отправка proof   │
+     │                      │  3. Send proof       │
      │                      │─────────────────────▶│
      │                      │                      │
-     │                      │  4. Верификация      │
+     │                      │  4. Verification     │
      │                      │◀─────────────────────│
      │                      │                      │
-     │  5. Результат        │                      │
+     │  5. Result           │                      │
      │◀─────────────────────│                      │
      │                      │                      │
 ```
 
-## Компоненты
+## Components
 
 ### 1. Circom Circuit (`circuits/circuit.circom`)
-- Схема для доказательства что возраст >= 18
-- Использует компаратор из circomlib
-- Публичный вход: threshold (18)
-- Приватный вход: age (реальный возраст пользователя)
+- Circuit for proving that age >= 18
+- Uses comparator from circomlib
+- Public input: threshold (18)
+- Private input: age (user's actual age)
 
 ### 2. Frontend (`frontend/`)
-- HTML + JavaScript с snarkJS
-- Генерация ZK-proof в браузере
-- Не раскрывает точный возраст
+- HTML + JavaScript with snarkJS
+- ZK-proof generation in browser
+- Does not reveal exact age
 
 ### 3. Backend (`backend/`)
-- Golang сервер
-- Верификация доказательств
-- REST API для проверки
+- Golang server
+- Proof verification
+- REST API for verification
 
-## Быстрый старт
+## Quick Start
 
-### Требования
+### Requirements
 - Go 1.21+
 - Node.js 18+
-- Circom (для компиляции схем)
+- Circom (for circuit compilation)
 - snarkjs
 
-### 1. Компиляция схемы
+### 1. Compile the circuit
 
 ```bash
 cd circuits
 ./compile.sh
 ```
 
-Это создаст:
-- `circuit.wasm` - для генерации proof
+This will create:
+- `circuit.wasm` - for proof generation
 - `circuit_final.zkey` - proving key
 - `../keys/verification_key.json` - verification key
 
-### 2. Запуск бэкенда
+### 2. Start the backend
 
 ```bash
 cd backend
 go run main.go
 ```
 
-Сервер запустится на порту 8080.
+The server will start on port 8080.
 
-### 3. Запуск фронта
+### 3. Start the frontend
 
-Откройте `frontend/index.html` в браузере или используйте локальный сервер:
+Open `frontend/index.html` in a browser or use a local server:
 
 ```bash
 cd frontend
@@ -88,7 +88,7 @@ python3 -m http.server 3000
 
 ### POST /api/verify
 
-Проверка ZK доказательства.
+Verify ZK proof.
 
 **Request:**
 ```json
@@ -112,63 +112,63 @@ python3 -m http.server 3000
 
 ### GET /api/health
 
-Проверка статуса сервера.
+Check server status.
 
-## Как это работает
+## How it works
 
-1. Пользователь вводит дату рождения
-2. Frontend вычисляет возраст
-3. Генерируется ZK-proof что возраст >= 18
-4. Proof отправляется на backend
-5. Backend верифицирует proof без знания точного возраста
-6. Возвращается результат верификации
+1. User enters birth date
+2. Frontend calculates age
+3. ZK-proof is generated proving age >= 18
+4. Proof is sent to backend
+5. Backend verifies proof without knowing exact age
+6. Verification result is returned
 
-## Безопасность и приватность
+## Security and Privacy
 
-✅ **Что скрыто:**
-- Точная дата рождения
-- Точный возраст
-- Любые персональные данные
+✅ **Hidden:**
+- Exact birth date
+- Exact age
+- Any personal data
 
-✅ **Что известно:**
-- Факт того что пользователь 18+ (или нет)
+✅ **Known:**
+- Fact that user is 18+ (or not)
 
-## Структура проекта
+## Project Structure
 
 ```
 zk-kyc/
 ├── backend/
-│   ├── main.go           # Golang сервер
-│   ├── go.mod            # Go модуль
-│   └── bin/server        # Скомпилированный бинарник
+│   ├── main.go           # Golang server
+│   ├── go.mod            # Go module
+│   └── bin/server        # Compiled binary
 ├── frontend/
-│   ├── index.html        # UI страница
-│   └── app.js            # Логика snarkJS
+│   ├── index.html        # UI page
+│   └── app.js            # snarkJS logic
 ├── circuits/
-│   ├── circuit.circom    # Circom схема
-│   ├── compile.sh        # Скрипт компиляции
-│   └── circuit.wasm      # (после компиляции)
+│   ├── circuit.circom    # Circom circuit
+│   ├── compile.sh        # Compilation script
+│   └── circuit.wasm      # (after compilation)
 ├── keys/
-│   └── verification_key.json  # (после компиляции)
+│   └── verification_key.json  # (after compilation)
 └── README.md
 ```
 
-## Демо режим
+## Demo Mode
 
-Если файлы схемы ещё не скомпилированы, frontend работает в демо режиме:
-- Генерируются фиктивные proof
-- Верификация происходит локально
-- Позволяет тестировать UI без полной настройки
+If circuit files are not yet compiled, frontend runs in demo mode:
+- Fake proofs are generated
+- Verification happens locally
+- Allows testing UI without full setup
 
-## Следующие шаги
+## Next Steps
 
-1. ✅ Бэкенд на Golang - готов
-2. ✅ Фронтенд на JavaScript/snarkJS - готов
-3. ✅ Circom схема - готова
-4. ⏳ Компиляция схемы (требует установки circom)
-5. ⏳ Интеграционное тестирование
+1. ✅ Golang backend - ready
+2. ✅ JavaScript/snarkJS frontend - ready
+3. ✅ Circom circuit - ready
+4. ⏳ Circuit compilation (requires circom installation)
+5. ⏳ Integration testing
 
-## Ресурсы
+## Resources
 
 - [Circom Documentation](https://docs.circom.io/)
 - [snarkJS GitHub](https://github.com/iden3/snarkjs)
