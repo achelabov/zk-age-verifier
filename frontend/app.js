@@ -3,22 +3,22 @@
 
 const BACKEND_URL = 'http://localhost:8080';
 
-// Глобальные переменные для хранения ключей и схемы
+// Global variables for storing keys and schema
 let verificationKey = null;
 let wasmBlob = null;
 let zkeyBlob = null;
 
-// Инициализация при загрузке страницы
+// Initialization on page load
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('ZK KYC Frontend initialized');
     
-    // В реальном приложении здесь загружались бы:
-    // 1. verification_key.json - ключ верификации
-    // 2. circuit.wasm - WebAssembly файл схемы
-    // 3. circuit_final.zkey - файл с настройками доверия
+    // In a real application, the following would be loaded here:
+    // 1. verification_key.json - verification key
+    // 2. circuit.wasm - circuit WebAssembly file
+    // 3. circuit_final.zkey - trusted setup file
     
     try {
-        // Попытка загрузить файлы (будет работать после компиляции circom)
+        // Attempt to load files (will work after circom compilation)
         await loadZKFiles();
     } catch (error) {
         console.warn('ZK files not loaded yet (expected before circom compilation):', error.message);
@@ -28,24 +28,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupFormHandler();
 });
 
-// Загрузка ZK файлов
+// Load ZK files
 async function loadZKFiles() {
     try {
-        // Загрузка ключа верификации
+        // Load verification key
         const vkResponse = await fetch('../keys/verification_key.json');
         if (vkResponse.ok) {
             verificationKey = await vkResponse.json();
             console.log('Verification key loaded');
         }
         
-        // Загрузка WASM файла
+        // Load WASM file
         const wasmResponse = await fetch('../circuits/circuit.wasm');
         if (wasmResponse.ok) {
             wasmBlob = await wasmResponse.blob();
             console.log('WASM file loaded');
         }
         
-        // Загрузка zkey файла
+        // Load zkey file
         const zkeyResponse = await fetch('../circuits/circuit_final.zkey');
         if (zkeyResponse.ok) {
             zkeyBlob = await zkeyResponse.blob();
@@ -56,7 +56,7 @@ async function loadZKFiles() {
     }
 }
 
-// Обработчик формы
+// Form handler
 function setupFormHandler() {
     const form = document.getElementById('kycForm');
     const verifyBtn = document.getElementById('verifyBtn');
@@ -74,7 +74,7 @@ function setupFormHandler() {
         const birthDate = new Date(birthDateInput);
         const today = new Date();
         
-        // Расчет возраста
+        // Calculate age
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
         
@@ -89,15 +89,15 @@ function setupFormHandler() {
             return;
         }
         
-        // Блокируем кнопку и показываем индикатор загрузки
+        // Disable button and show loading indicator
         verifyBtn.disabled = true;
         showLoading(true);
         
         try {
-            // Генерация доказательства
+            // Generate proof
             const proof = await generateProof(age);
             
-            // Отправка на бэкенд для верификации
+            // Send to backend for verification
             const result = await verifyProof(proof);
             
             if (result.verified) {
@@ -116,18 +116,18 @@ function setupFormHandler() {
     });
 }
 
-// Генерация zero-knowledge доказательства
+// Generate zero-knowledge proof
 async function generateProof(age) {
     console.log('Generating proof for age:', age);
     
-    // Проверка наличия необходимых файлов
+    // Check for required files
     if (!wasmBlob || !zkeyBlob) {
-        // Демо режим - симуляция доказательства
+        // Demo mode - simulate proof
         console.log('Running in demo mode (no circuit files)');
         return createDemoProof(age >= 18);
     }
     
-    // Входные данные для схемы
+    // Input data for the circuit
     const input = {
         age: age,
         threshold: 18
@@ -135,7 +135,7 @@ async function generateProof(age) {
     
     console.log('Input:', input);
     
-    // Генерация доказательства с использованием snarkJS
+    // Generate proof using snarkJS
     const { proof, publicSignals } = await snarkjs.groth16.fullProve(
         input,
         wasmBlob,
@@ -151,7 +151,7 @@ async function generateProof(age) {
     };
 }
 
-// Создание демо-доказательства (когда нет файлов схемы)
+// Create demo proof (when circuit files are not available)
 function createDemoProof(isOver18) {
     return {
         proof: {
@@ -183,7 +183,7 @@ function createDemoProof(isOver18) {
     };
 }
 
-// Верификация доказательства на бэкенде
+// Verify proof on backend
 async function verifyProof(proofData) {
     console.log('Verifying proof on backend...');
     
@@ -209,16 +209,16 @@ async function verifyProof(proofData) {
         
         return result;
     } catch (error) {
-        // Если бэкенд недоступен, делаем локальную верификацию (для демо)
+        // If backend is unavailable, do local verification (for demo)
         console.warn('Backend unavailable, using local verification:', error.message);
         return localVerify(proofData);
     }
 }
 
-// Локальная верификация (fallback)
+// Local verification (fallback)
 async function localVerify(proofData) {
     if (!verificationKey) {
-        // Демо режим - просто проверяем public signals
+        // Demo mode - just check public signals
         const isOver18 = proofData.pubSignals[0] === "1";
         return {
             verified: isOver18,
@@ -226,7 +226,7 @@ async function localVerify(proofData) {
         };
     }
     
-    // Полная верификация через snarkJS
+    // Full verification via snarkJS
     const verified = await snarkjs.groth16.verify(
         verificationKey,
         proofData.pubSignals,
@@ -239,20 +239,20 @@ async function localVerify(proofData) {
     };
 }
 
-// Отображение результата
+// Display result
 function showResult(message, type) {
     const resultDiv = document.getElementById('result');
     resultDiv.textContent = message;
     resultDiv.className = `result ${type}`;
 }
 
-// Отображение индикатора загрузки
+// Display loading indicator
 function showLoading(show) {
     const loadingDiv = document.getElementById('loading');
     loadingDiv.style.display = show ? 'block' : 'none';
 }
 
-// Отображение деталей доказательства
+// Display proof details
 function showProofDetails(proof) {
     const detailsDiv = document.getElementById('proofDetails');
     detailsDiv.innerHTML = `
