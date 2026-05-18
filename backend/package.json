@@ -1,0 +1,20 @@
+{
+  "name": "zk-kyc-backend",
+  "version": "1.0.0",
+  "description": "Simple ZK KYC backend - age verification (18+)",
+  "main": "main.go",
+  "scripts": {
+    "build": "go build -o bin/server",
+    "start": "go run main.go",
+    "test": "go test ./..."
+  },
+  "keywords": [
+    "zk",
+    "kyc",
+    "zero-knowledge",
+    "age-verification"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}
