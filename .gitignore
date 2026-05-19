@@ -1,0 +1,31 @@
+# Node modules
+node_modules/
+package.json
+package-lock.json
+
+# Generated circuit files
+*.r1cs
+*.wasm
+*.sym
+*.ptau
+*.zkey
+verification_key.json
+*_js/
+
+# Backend
+backend/zkey/
+backend/go.sum
+
+# Frontend generated files
+frontend/circom/
+frontend/zkey/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
